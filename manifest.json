@@ -9,7 +9,8 @@
         "128": "icons/logo128.png"
     },
     "permissions": [
-        "tabs"
+        "tabs",
+        "scripting"
     ],
     "host_permissions": [
         "https://jira.moscow.alfaintra.net/*",
@@ -25,7 +26,8 @@
                 "content.js"
             ],
             "all_frames": true,
-            "run_at": "document_idle"
+            "match_about_blank": true,
+            "run_at": "document_start"
         }
     ],
     "background": {
