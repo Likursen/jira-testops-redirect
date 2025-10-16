@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "Jira Testops Link Redirect",
-    "version": "1.1",
+    "version": "1.3",
     "icons": {
         "16": "icons/logo16.png",
         "32": "icons/logo32.png",
@@ -10,7 +10,8 @@
     },
     "permissions": [
         "tabs",
-        "scripting"
+        "scripting",
+        "contextMenus"
     ],
     "host_permissions": [
         "https://jira.moscow.alfaintra.net/*",

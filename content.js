@@ -1,36 +1,52 @@
 const REDIRECT_PATH = '/iframe/issue-tracker-testcase/';
 const TARGET_BASE = 'https://testops.moscow.alfaintra.net/project/163/test-cases/';
+function processLink(linkElement) {
+    try {
+        const url = new URL(linkElement.href);
+        const pathParts = url.pathname.split('/');
+        const targetIndex = pathParts.indexOf('issue-tracker-testcase');
+
+        if (targetIndex === -1 || targetIndex >= pathParts.length - 1) return null;
+
+        const targetId = pathParts[targetIndex + 1];
+        if (!/^\d+$/.test(targetId)) return null;
+
+        return `${TARGET_BASE}${targetId}`;
+    } catch (error) {
+        console.error('Link processing error:', error);
+        return null;
+    }
+}
 
 function handleClick(e) {
+    if (e.button === 2) return;
+
     const link = e.target.closest('a[href*="/iframe/issue-tracker-testcase/"]');
     if (!link) return;
 
     e.preventDefault();
     e.stopImmediatePropagation();
 
-    try {
-        const url = new URL(link.href);
-        const pathParts = url.pathname.split('/');
-        const targetIndex = pathParts.indexOf('issue-tracker-testcase');
-        
-        if (targetIndex === -1 || targetIndex >= pathParts.length - 1) return;
-        
-        const targetId = pathParts[targetIndex + 1];
-        if (!/^\d+$/.test(targetId)) return;
+    const newUrl = processLink(link);
+    if (!newUrl) return;
 
-        const newUrl = `${TARGET_BASE}${targetId}`;
-        const isMiddleClick = e.button === 1 || e.type === 'auxclick';
-        const isModifiedClick = e.metaKey || e.ctrlKey;
+    const isNewTab = e.button === 1 || e.metaKey || e.ctrlKey;
 
-        chrome.runtime.sendMessage({
-            action: isMiddleClick || isModifiedClick ? "createTab" : "updateTab",
-            url: newUrl
-        });
-
-    } catch (error) {
-        console.error('Redirect Error:', error);
-    }
+    chrome.runtime.sendMessage({
+        action: isNewTab ? "createTab" : "updateTab",
+        url: newUrl
+    });
 }
 
-document.addEventListener('auxclick', handleClick, true);
+document.addEventListener('contextmenu', (e) => {
+    const link = e.target.closest('a[href*="/iframe/issue-tracker-testcase/"]');
+    if (link) {
+        chrome.runtime.sendMessage({
+            action: "storeLink",
+            url: link.href
+        });
+    }
+}, true);
+
 document.addEventListener('click', handleClick, true);
+document.addEventListener('auxclick', handleClick, true);
